@@ -82,7 +82,7 @@ def plot_trajectory(traj_info, num_points=1000):
     Parameters:
         traj_info (dict): Dictionary from one_dof_minimum_time containing keys:
             "T", "ta1", "tv", "ta2", "p1", "p2", "v1", "v2", 
-            "vlimit", "a1", "a2", "traj_type".
+            "vlimit", "vswitch", "a1", "a2", "traj_type".
         num_points (int): Number of time samples for the plot.
     """
     # Get total time and create time array.
@@ -114,7 +114,7 @@ def plot_trajectory(traj_info, num_points=1000):
     axs[2].legend(loc='upper right')
 
     # Set overall title with trajectory type.
-    plt.suptitle(f"Total time: {list(traj_info['T'])[0]:.3f}\nTrajectory type: {traj_info['traj_type']}", fontsize=14)
+    plt.suptitle(f"Total time: {list(traj_info['T'])[0]:.3f}s\nTrajectory type: {traj_info['traj_type']}", fontsize=14)
     plt.tight_layout()
     plt.show()
 
