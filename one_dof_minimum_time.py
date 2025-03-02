@@ -30,7 +30,8 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
             "vlimit": signed velocity limit,
             "a1": acceleration during the acceleration phase,
             "a2": acceleration during the deceleration phase,
-            "traj_type": trajectory type string.
+            "traj_type": trajectory type string,
+            "vswitch": the velocity at the end of acceleration phase (only for two-phase; None for three-phase)
     """
     assert vmax > 1e-6, "vmax must be > 1e-6 for numerical stability."
     assert amax > 1e-6, "amax must be > 1e-6 for numerical stability."
@@ -56,6 +57,8 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
         # Precompute position at the end of the acceleration phase.
         p_acc_end = p1 + v1 * ta1 + 0.5 * a1 * ta1**2
         p_const_end = None
+        # vswitch is the velocity at the end of the acceleration phase.
+        vswitch = v1 + a1 * ta1
     else:
         # Three-phase trajectory: acceleration, constant velocity, deceleration.
         traj_type = "P+L+P-" if a1 > 0 else "P-L-P+"
@@ -67,8 +70,9 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
         # Precompute positions at the end of acceleration and constant-velocity phases.
         p_acc_end = p1 + v1 * ta1 + 0.5 * a1 * ta1**2
         p_const_end = p_acc_end + vlimit * tv
+        vswitch = None
 
-    return {"T": T, "ta1": ta1, "tv": tv, "ta2": ta2, "p1": p1, "p2": p2, "p_acc_end": p_acc_end, "p_const_end": p_const_end, "v1": v1, "v2": v2, "vlimit": vlimit, "a1": a1, "a2": a2, "traj_type": traj_type}
+    return {"T": T, "ta1": ta1, "tv": tv, "ta2": ta2, "p1": p1, "p2": p2, "p_acc_end": p_acc_end, "p_const_end": p_const_end, "v1": v1, "v2": v2, "vlimit": vlimit, "vswitch": vswitch, "a1": a1, "a2": a2, "traj_type": traj_type}
 
 def plot_trajectory(traj_info, num_points=1000):
     """

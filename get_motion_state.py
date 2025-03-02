@@ -16,7 +16,7 @@ def get_motion_state_at_local_t(traj_info, t):
     # Extract parameters
     T, ta1, tv, ta2 = traj_info["T"], traj_info["ta1"], traj_info["tv"], traj_info["ta2"]
     p1, p2, p_acc_end, p_const_end = traj_info["p1"], traj_info["p2"], traj_info["p_acc_end"], traj_info["p_const_end"]
-    v1, v2, vlimit = traj_info["v1"], traj_info["v2"], traj_info["vlimit"]
+    v1, v2, vlimit, vswitch = traj_info["v1"], traj_info["v2"], traj_info["vlimit"], traj_info["vswitch"]
     a1, a2 = traj_info["a1"], traj_info["a2"]
     
     # Helper to convert scalar to an array with shape (1,)
@@ -39,7 +39,6 @@ def get_motion_state_at_local_t(traj_info, t):
         else:
             dt = t - ta1
             # Use precomputed p_acc_end for the start of deceleration.
-            vswitch = v1 + a1 * ta1
             pos = p_acc_end + vswitch * dt + 0.5 * a2 * dt**2
             vel = vswitch + a2 * dt
             acc = a2
