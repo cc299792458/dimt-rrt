@@ -40,9 +40,7 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
     # Determine motion direction.
     delta_pacc = 0.5 * (v1 + v2) * abs(v2 - v1) / amax
     sigma = np.sign(p2 - p1 - delta_pacc) if np.sign(p2 - p1 - delta_pacc) != 0 else 1
-    a1 = sigma * amax
-    a2 = -sigma * amax
-    vlimit = sigma * vmax
+    a1, a2, vlimit = sigma * amax, -sigma * amax, sigma * vmax 
 
     # Candidate time for acceleration phase.
     ta1_candidate = max(solve_quadratic(a=a1, b=2*v1, c=(v2**2 - v1**2) / (2*a2) - (p2 - p1)))
@@ -51,9 +49,9 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
         # Two-phase trajectory: acceleration then deceleration.
         traj_type = "P+P-" if a1 > 0 else "P-P+"
         ta1 = ta1_candidate
+        tv = None
         ta2 = (v2 - v1) / a2 + ta1
         T = ta1 + ta2
-        tv = None
 
         # Precompute position at the end of the acceleration phase.
         p_acc_end = p1 + v1 * ta1 + 0.5 * a1 * ta1**2

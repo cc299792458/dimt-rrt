@@ -25,7 +25,7 @@ def solve_quadratic(a, b, c):
     # Compute the discriminant
     disc = b**2 - 4*a*c
     if disc < 0:
-        raise ValueError("No real solutions (discriminant < 0).")
+        return None, None
 
     # Take the square root of the discriminant
     sqrt_disc = np.sqrt(disc)
@@ -40,7 +40,7 @@ def solve_quadratic(a, b, c):
 
     # Check if q is zero to avoid division by zero
     if q == 0:
-        raise ValueError("Encountered q = 0, cannot compute x2 from c/q.")
+        return None, None
 
     # Compute the two solutions
     x1 = q / a
