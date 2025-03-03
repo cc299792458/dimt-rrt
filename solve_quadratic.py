@@ -31,9 +31,7 @@ def solve_quadratic(a, b, c):
     sqrt_disc = np.sqrt(disc)
 
     # Determine the sign of b; if b == 0, force sign_b to 1 to avoid q=0
-    sign_b = np.sign(b)
-    if sign_b == 0:
-        sign_b = 1
+    sign_b = np.sign(b) if np.sign(b) != 0 else 1
 
     # Calculate q using the provided formula
     q = -0.5 * (b + sign_b * sqrt_disc)

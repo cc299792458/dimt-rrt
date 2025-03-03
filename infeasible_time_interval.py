@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     # Example 10:
     # This is a corner case.
-    start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([1.0]), np.array([1.0]), np.array([1.0]), np.array([1.0])
+    # start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([1.0]), np.array([1.0]), np.array([1.0])
 
     # Compute candidate trajectories and select the optimal one using the previously defined function.
     traj_info = infeasible_time_interval(start_pos, end_pos, start_vel, end_vel, vmax, amax)
