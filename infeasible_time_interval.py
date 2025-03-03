@@ -11,27 +11,33 @@ def infeasible_time_interval(start_pos, end_pos, start_vel, end_vel, vmax, amax)
     p1, p2, v1, v2 = start_pos, end_pos, start_vel, end_vel
 
     ##### First ditermine if the goal state is in region I. If not, return None. #####
-    sign_v1, norm_v1 = np.sign(v1), abs(v1)
-    if sign_v1 == 0:
-        raise NotImplementedError("Zero initial velocity not supported.")
-    if sign_v1 * (p2 - p1) < 0:
+    if np.sign(v1) == 0 or np.sign(v2) == 0:
+        # The goal state I does not exist in the first case, and the goal state is on the boundary on the second case.
+        return None
+    if np.sign(v1) * (p2 - p1) < 0:
         # The goal state is in region IV or region V.
         return None
-    delta_t = max(solve_quadratic(a=0.5 * amax, b=norm_v1, c=-abs(p2 - p1)))
-    upper_vel_bound = min(norm_v1 + amax * delta_t, vmax)
-    if v2 > upper_vel_bound: 
+    if np.sign(v1) * np.sign(v2) < 0:
+        # The goal state is in region III or region IV.
+        return None
+    delta_t = max(solve_quadratic(a=0.5 * amax, b=abs(v1), c=-abs(p2 - p1)))
+    upper_vel_bound = min(abs(v1) + amax * delta_t, vmax)
+    if abs(v2) > upper_vel_bound: 
         # The goal state is in region V.
         return None
-    brake_p = v1**2 / amax
-    if brake_p > abs(p2 - p1):
-        delta_t = min(solve_quadratic(a=-0.5 * amax, b=norm_v1, c=-abs(p2 - p1)))
-        lower_vel_bound = norm_v1 - amax * delta_t
+    brake_p = v1**2 / (2 * amax)
+    if brake_p >= abs(p2 - p1):
+        delta_t = min(solve_quadratic(a=-0.5 * amax, b=abs(v1), c=-abs(p2 - p1)))
+        lower_vel_bound = abs(v1) - amax * delta_t
+        if abs(v2) < lower_vel_bound: 
+            # The goal state is in region V.
+            return None
     else:
         delta_t = np.sqrt(2 * (abs(p2 - p1) - brake_p) / amax)
-        lower_vel_bound = min(0.5 * amax * delta_t**2, vmax)
-    if v2 < lower_vel_bound: 
-        # The goal state is in region II, III, IV, or V.
-        return None
+        lower_vel_bound = amax * delta_t
+        if abs(v2) <= lower_vel_bound: 
+            # The goal state is in region II.
+            return None
 
     ##### Then calculate the infeasible time interval. #####
     delta_pacc = 0.5 * (v1 + v2) * abs(v2 - v1) / amax
@@ -54,11 +60,65 @@ def infeasible_time_interval(start_pos, end_pos, start_vel, end_vel, vmax, amax)
 # ------------------ Testing and Plotting Code ------------------
 if __name__ == '__main__':
     np.random.seed(42)  # For reproducibility
-    
-    start_pos, end_pos = np.array([0]), np.array([5])
-    start_vel, end_vel = np.array([10]), np.array([10])
-    vmax, amax = np.array([10]), np.array([5])
+
+    start_pos, start_vel = np.array([np.random.uniform(0, 1)]), np.array([np.random.uniform(0, 1)])
+    end_pos, end_vel = np.array([np.random.uniform(0, 1)]), np.array([np.random.uniform(0, 1)])
+    vmax, amax = np.array([np.random.uniform(1, 2)]), np.array([np.random.uniform(1, 2)])
+
+    # # Examples
+    # vmax, amax = np.array([1]), np.array([1])
+    # # Examples set 1
+    # start_pos, start_vel = np.array([0]), np.array([0.5])
+    # # Example 1.1: region I.
+    # end_pos, end_vel = np.array([0.125]), np.array([0.5])
+    # # Example 1.2: region II.
+    # end_pos, end_vel = np.array([0.3]), np.array([0.5])
+    # # Example 1.3: region III.
+    # end_pos, end_vel = np.array([0.2]), np.array([-0.5])
+    # # Example 1.4: region IV.
+    # end_pos, end_vel = np.array([0]), np.array([-0.5])
+    # # Example 1.5: region V.
+    # end_pos, end_vel = np.array([0]), np.array([0.25])
+    # end_pos, end_vel = np.array([0]), np.array([0.75])
+    # end_pos, end_vel = np.array([-0.125]), np.array([0.5])
+
+    # # Examples set 2
+    # start_pos, start_vel = np.array([0]), np.array([-0.5])
+    # # Example 2.1: region I.
+    # end_pos, end_vel = np.array([-0.125]), np.array([-0.5])
+    # # Example 2.2: region II.
+    # end_pos, end_vel = np.array([-0.3]), np.array([-0.5])
+    # # Example 2.3: region III.
+    # end_pos, end_vel = np.array([-0.2]), np.array([0.5])
+    # # Example 2.4: region IV.
+    # end_pos, end_vel = np.array([0]), np.array([0.5])
+    # # Example 2.5: region V.
+    # end_pos, end_vel = np.array([0]), np.array([-0.25])
+    # end_pos, end_vel = np.array([0]), np.array([-0.75])
+    # end_pos, end_vel = np.array([0.125]), np.array([-0.5])
+
+    # # Example set 3
+    # start_pos, start_vel = np.array([0]), np.array([1.0])
+    # # Example 3.1: region I.
+    # end_pos, end_vel = np.array([0.5]), np.array([1.0])
+    # # Example 3.2: region II.
+    # end_pos, end_vel = np.array([1.2]), np.array([1.0])
+    # # Example 3.3: region III.
+    # end_pos, end_vel = np.array([0.5]), np.array([-1.0])
+    # # Example 3.4: region IV.
+    # end_pos, end_vel = np.array([0]), np.array([-1.0])
+    # # Example 3.5: region V.
+    # end_pos, end_vel = np.array([0]), np.array([0.8])
+    # end_pos, end_vel = np.array([-0.5]), np.array([1.0])
+
+    # # Example set 4
+    # start_pos, start_vel = np.array([0]), np.array([0.5])
+    # # Example 4.1
+    # end_pos, end_vel = np.array([0]), np.array([0.5])
+    # # Example 4.2
+    # end_pos, end_vel = np.array([0.125]), np.array([0])
+    # # Example 4.3
+    # end_pos, end_vel = np.array([0.25]), np.array([0.5])
 
     # Calculate the infeasible time interval
     interval_info = infeasible_time_interval(start_pos, end_pos, start_vel, end_vel, vmax, amax)
-    print(interval_info)
