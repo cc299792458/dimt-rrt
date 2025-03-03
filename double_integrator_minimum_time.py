@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 from is_segment_feasible import is_segment_feasible
 from one_dof_minimum_time import one_dof_minimum_time
@@ -53,7 +54,7 @@ def compute_traj_infos(start_state, end_state, traj_time, vmax, amax, n_dim):
     # Vectorized calculation for all dimensions
     traj_infos = []
     for dim in range(n_dim):
-        trajectories, optimal_label = fixed_time_trajectory(
+        traj_info = fixed_time_trajectory(
             start_pos=start_state[0][dim],
             end_pos=end_state[0][dim],
             start_vel=start_state[1][dim],
@@ -62,10 +63,33 @@ def compute_traj_infos(start_state, end_state, traj_time, vmax, amax, n_dim):
             T=traj_time,
             a_threshold=amax[dim]
         )
-        if trajectories is None:
+        if traj_info is None:
             raise NotImplementedError
-            # NOTE: This is actually possible. See consistency_validation.py for an example.
-            return None
-        traj_infos.append((trajectories[optimal_label], optimal_label))
+        traj_infos.append(traj_info)
 
     return np.array(traj_infos, dtype=object)
+
+# ------------------ Testing and Main Code ------------------
+if __name__ == '__main__':
+    np.random.seed(42)  # For reproducibility
+
+    # Default collision checker: returns True for all states
+    def default_collision_checker(state):
+        # state is in the form (position, velocity)
+        return True
+    n_dim = 7
+    bounds = np.tile(np.array([[-10, 10]]).T, (1, n_dim))
+
+    for i in tqdm(range(10000)):
+        # Generate random boundary conditions.
+        start_pos = np.random.uniform(-10, 10, n_dim)
+        end_pos = np.random.uniform(-10, 10, n_dim)
+        start_vel = np.random.uniform(-2, 2, n_dim)
+        end_vel = np.random.uniform(-2, 2, n_dim)
+        vmax = np.random.uniform(2, 4, n_dim)
+        amax = np.random.uniform(2, 4, n_dim)
+
+        start_state, end_state = np.array([start_pos, start_vel]), np.array([end_pos, end_vel])
+
+        traj_infos = compute_traj_segment(start_state=start_state, end_state=end_state, vmax=vmax, amax=amax, 
+                                        collision_checker=default_collision_checker, bounds=bounds, n_dim=n_dim)

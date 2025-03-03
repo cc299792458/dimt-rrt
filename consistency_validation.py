@@ -1,10 +1,8 @@
 import numpy as np
-
 from tqdm import tqdm
 
 from one_dof_minimum_time import one_dof_minimum_time
 from fixed_time_trajectory import fixed_time_trajectory
-from infeasible_time_interval import infeasible_time_interval
 
 # ------------------ Testing Code ------------------
 if __name__ == '__main__':
@@ -28,6 +26,3 @@ if __name__ == '__main__':
 
         assert np.isclose(amin, amax)
         assert amin <= amax
-
-    ##### 2. Then, it's also matter to test the consistency between 'one_dof_miminum_time', #####
-    ##### 'fixed_time_trajectory', and 'infeasible_time_interval' #####

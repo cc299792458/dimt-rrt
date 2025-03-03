@@ -6,7 +6,7 @@ def is_segment_feasible(traj_time, traj_infos, collision_checker, bounds, n_dim,
     """
         Check if the trajectory segment is within bounds and collision free.
     """
-    if traj_infos:
+    if traj_infos is None:
         return False
     # Generate time points to sample along the traj
     num_samples = int(traj_time / time_step) + 1
