@@ -44,7 +44,7 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
     a1, a2, vlimit = sigma * amax, -sigma * amax, sigma * vmax 
 
     # Candidate time for acceleration phase.
-    ta1_candidate = max(solve_quadratic(a=a1, b=2*v1, c=(v2**2 - v1**2) / (2*a2) - (p2 - p1)))
+    ta1_candidate = max(solve_quadratic(a=a1, b=2 * v1, c=(v2**2 - v1**2) / (2 * a2) - (p2 - p1)))
     
     if abs(v1 + ta1_candidate * a1) <= vmax:
         # Two-phase trajectory: acceleration then deceleration.
@@ -52,8 +52,8 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
         ta1 = ta1_candidate
         tv = None
         ta2 = (v2 - v1) / a2 + ta1
+        assert ta1 >= 0 and ta2 >= 0
         T = ta1 + ta2
-
         # Precompute position at the end of the acceleration phase.
         p_acc_end = p1 + v1 * ta1 + 0.5 * a1 * ta1**2
         p_const_end = None
@@ -63,10 +63,10 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
         # Three-phase trajectory: acceleration, constant velocity, deceleration.
         traj_type = "P+L+P-" if a1 > 0 else "P-L-P+"
         ta1 = (vlimit - v1) / a1
-        tv = (v1**2 + v2**2 - 2*vlimit**2) / (2*vlimit*a1) + (p2 - p1) / vlimit
+        tv = (v1**2 + v2**2 - 2 * vlimit**2) / (2 * vlimit * a1) + (p2 - p1) / vlimit
         ta2 = (v2 - vlimit) / a2
+        assert ta1 >= 0 and tv >= 0 and ta2 >= 0
         T = ta1 + tv + ta2
-
         # Precompute positions at the end of acceleration and constant-velocity phases.
         p_acc_end = p1 + v1 * ta1 + 0.5 * a1 * ta1**2
         p_const_end = p_acc_end + vlimit * tv

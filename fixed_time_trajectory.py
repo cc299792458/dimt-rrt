@@ -28,6 +28,7 @@ def fixed_time_trajectory(start_pos, end_pos, start_vel, end_vel, vmax, T, a_thr
             ta1 = ta1_candidate
             tv = None
             ta2 = T - ta1
+            assert ta1 >= 0 and ta2 >= 0
             p_acc_end = p1 + v1 * ta1 + 0.5 * a1 * ta1**2
             p_const_end = None
             vswitch = v1 + a1 * ta1
