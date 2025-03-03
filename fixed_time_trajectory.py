@@ -131,7 +131,7 @@ if __name__ == '__main__':
     # This is a corner case.
     # start_pos, end_pos, start_vel, end_vel, T = np.array([0.0]), np.array([1.0]), np.array([1.0]), np.array([1.0]), np.array([1.0])
 
-    # Compute candidate trajectories and select the optimal one using the previously defined function.
+    # Compute trajectory information that corresponding to the minimal acceleration trajectory.
     traj_info = fixed_time_trajectory(start_pos, end_pos, start_vel, end_vel, vmax, T, a_threshold)
     if traj_info is not None:
         plot_trajectory(traj_info=traj_info)
