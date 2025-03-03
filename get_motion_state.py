@@ -61,3 +61,37 @@ def get_motion_state_at_local_t(traj_info, t):
             acc = a2
   
     return to_array(pos), to_array(vel), to_array(acc)
+
+def get_motion_states_at_local_t(traj_infos, t, n_dim):
+    """
+    Compute the multi-dimensional motion states (position and velocity) at a given local time.
+
+    For each degree-of-freedom (dimension), this function evaluates the position and velocity 
+    at time t using the corresponding trajectory information from traj_infos. It calls 
+    get_motion_state_at_local_t for each individual dimension.
+
+    Parameters:
+        traj_infos (list of dict): A list of dictionaries (one per dimension) containing 
+            trajectory parameters such as "T", "ta1", "tv", "ta2", "p1", "p2", "p_acc_end",
+            "p_const_end", "v1", "v2", "vlimit", "a1", "a2", and "traj_type".
+        t (float): The local time within the trajectory segment (0 <= t <= T) at which to evaluate the state.
+        n_dim (int): The number of dimensions or degrees-of-freedom.
+
+    Returns:
+        tuple: A tuple (position, velocity) where:
+            - position (np.array): An array containing the computed position for each dimension.
+            - velocity (np.array): An array containing the computed velocity for each dimension.
+    """
+    # Initialize arrays for positions and velocities for all dimensions.
+    position = np.zeros(n_dim)
+    velocity = np.zeros(n_dim)
+
+    # Loop through each dimension to compute its state.
+    for dim in range(n_dim):
+        # Evaluate the motion state (position, velocity, acceleration) for the current dimension at time t.
+        pos, vel, acc = get_motion_state_at_local_t(traj_info=traj_infos[dim], t=t)
+
+        # Save the computed position and velocity for this dimension.
+        position[dim], velocity[dim] = pos, vel
+
+    return position, velocity
