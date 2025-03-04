@@ -91,68 +91,17 @@ class Scene:
         pos = state[0]
         return self._is_point_collision_free(pos)
     
-    def plot_scene(self, tree=None, path=None, smoothed_path=None, ax=None, save_image=False, image_path="rrt.png"):
-        """
-        Plot the scene, including obstacles, start/goal points, the RRT tree, and the found path.
-        Different obstacle types are shown with different colors.
-        """
-        if ax is None:
-            fig, ax = plt.subplots(figsize=(8, 8))
-        # Plot obstacles
-        for obs in self.obstacles:
-            if obs[0] == "ellipse":
-                _, center, rx, ry = obs
-                ellipse = Ellipse(xy=center, width=2*rx, height=2*ry,
-                                edgecolor='r', facecolor='gray', alpha=0.5)
-                ax.add_patch(ellipse)
-            elif obs[0] == "rectangle":
-                _, center, width, height = obs
-                rect = Rectangle((center[0]-width/2, center[1]-height/2), width, height,
-                                edgecolor='r', facecolor='gray', alpha=0.5)
-                ax.add_patch(rect)
-        # Plot start and goal points
-        ax.plot(self.start[0], self.start[1], 'go', markersize=10, label='Start')
-        ax.plot(self.goal[0], self.goal[1], 'bo', markersize=10, label='Goal')
-        # Plot RRT tree edges if provided
-        if tree is not None:
-            for node in tree:
-                if node.parent is not None:
-                    p1 = node.parent.position
-                    p2 = node.position
-                    ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color='yellow', alpha=0.8)
-        # Plot path if provided
-        if path is not None:
-            path_positions = np.array([state[0] for state in path])
-            ax.plot(path_positions[:, 0], path_positions[:, 1], color='red', linewidth=3, label='Path')
-        if smoothed_path is not None:
-            smoothed_path_positions = np.array([state[0] for state in smoothed_path])
-            ax.plot(smoothed_path_positions[:, 0], smoothed_path_positions[:, 1], color='purple', linewidth=3, label='Smoothed Path')
-        x_min, x_max, y_min, y_max = self.bounds
-        ax.set_xlim(x_min, x_max)
-        ax.set_ylim(y_min, y_max)
-        ax.set_aspect('equal')
-        ax.set_title("Scene with Random Obstacles and RRT")
-        ax.set_xlabel("X")
-        ax.set_ylabel("Y")
-        ax.legend(loc="lower left")
-        
-        # Save image if requested
-        if save_image:
-            fig.savefig(image_path)
-            print(f"Scene image saved to {image_path}")
-        
-        return ax
-    
 # Example usage
 if __name__ == "__main__":
     seed = 42
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
-    scene = Scene(num_ellipses=10, num_rectangles=15, min_distance=5.0)
+    scene = Scene(num_ellipses=2, num_rectangles=2, min_distance=5.0)
 
     vmax, amax = np.array([1.0, 1.0]), np.array([1.0, 1.0])
 
-    dimt_rrt = DIMTRRT(scene.start, scene.goal, np.vstack((scene.bounds[::2], scene.bounds[1::2])), vmax=vmax, amax=amax, 
-                       collision_checker=scene.collision_checker)
-    dimt_rrt.solve(plot=True)
+    dimt_rrt = DIMTRRT(np.vstack([scene.start, np.zeros([2])]), np.vstack([scene.goal, np.zeros([2])]), 
+                       np.vstack((scene.bounds[::2], scene.bounds[1::2])), vmax=vmax, amax=amax, 
+                       collision_checker=scene.collision_checker, obstacles=scene.obstacles, visualization=True)
+    dimt_rrt.solve()
