@@ -29,18 +29,20 @@ class DIMTRRT:
         self.obstacles = obstacles
         self.dimension = vmax.shape[0]
         self.visualization = visualization
-        if self.visualization:
-            self.plot()
 
     def solve(self, max_iteration=100):
-        for i in range(max_iteration):
+        for iteration in range(max_iteration):
+            if self.visualization:
+                self.iteration = iteration
+                self.plot()
             rand_state = self.sample_reachable_state()
             if self.connect(self.V1, self.E1, rand_state, self.direction):
                 if self.connect(self.V2, self.E2, rand_state, not self.direction):
                     return self.extract_trajectory()
             self.swap()
             self.direction = not self.direction
-            self.plot()
+        # if self.visualization:
+        #     self.plot()
 
     def sample_reachable_state(self):
         while True:
@@ -171,6 +173,9 @@ class DIMTRRT:
             self.steer_trajectory_line[0].remove()
             self.steer_trajectory_line = None
 
+            self._iteration_text = self._ax.text(0.95, 0.95, "", transform=self._ax.transAxes, 
+                                                fontsize=12, color="blue", ha="right", va="top")
+
         if plot_sampled_state:
             if self.sampled_state_point is None:
                 self.sampled_state_point, self.sampled_state_arrow = self.plot_state(state=self.sampled_state, color='y', markersize=6)
@@ -194,6 +199,8 @@ class DIMTRRT:
             for state in self.int_states:
                 self.plot_state(state=state, color=color)
             self.plot_trajectory(traj_time=self.steer_traj_time, traj_infos=self.steer_traj_infos, color=color)
+
+        self._iteration_text.set_text(f"Iteration: {self.iteration}")
 
         # Draw the plot
         self._fig.canvas.draw()

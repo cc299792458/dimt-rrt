@@ -97,7 +97,7 @@ if __name__ == "__main__":
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
-    scene = Scene(num_ellipses=2, num_rectangles=2, min_distance=5.0)
+    scene = Scene(num_ellipses=10, num_rectangles=15, min_distance=5.0)
 
     vmax, amax = np.array([1.0, 1.0]), np.array([1.0, 1.0])
 
