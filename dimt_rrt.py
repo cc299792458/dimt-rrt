@@ -41,8 +41,8 @@ class DIMTRRT:
                     return self.extract_trajectory()
             self.swap()
             self.direction = not self.direction
-        # if self.visualization:
-        #     self.plot()
+        if self.visualization:
+            self.plot()
 
     def sample_reachable_state(self):
         while True:
