@@ -1,19 +1,15 @@
 import numpy as np
 from tqdm import tqdm
 
-from is_segment_feasible import is_segment_feasible
 from one_dof_minimum_time import one_dof_minimum_time
 from fixed_time_trajectory import fixed_time_trajectory
 from infeasible_time_interval import infeasible_time_interval
 
-def compute_traj_segment(start_state, end_state, vmax, amax, collision_checker, bounds, n_dim):
+def compute_traj_segment(start_state, end_state, vmax, amax, n_dim):
     traj_time = compute_traj_time(start_state, end_state, vmax, amax, n_dim)
     traj_infos = compute_traj_infos(start_state, end_state, traj_time, vmax, amax, n_dim)
 
-    traj_feasibility = is_segment_feasible(traj_time=traj_time, traj_infos=traj_infos,
-                               collision_checker=collision_checker, bounds=bounds, n_dim=n_dim)
-
-    return traj_time, traj_infos, traj_feasibility
+    return traj_time, traj_infos
 
 def compute_traj_time(start_state, end_state, vmax, amax, n_dim):
     """
