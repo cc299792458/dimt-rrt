@@ -38,6 +38,9 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
 
     p1, p2, v1, v2 = start_pos, end_pos, start_vel, end_vel
 
+    if p1 == p2 and v1 == v2:
+        raise NotImplementedError
+
     # Determine motion direction.
     delta_pacc = 0.5 * (v1 + v2) * abs(v2 - v1) / amax
     sigma = np.sign(p2 - p1 - delta_pacc) if np.sign(p2 - p1 - delta_pacc) != 0 else 1
@@ -150,6 +153,9 @@ if __name__ == '__main__':
     # start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([0.6]), np.array([0.0]), np.array([1.0]) 
     # start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([0.5]), np.array([0.0]), np.array([0.8])
     # start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([0.5]), np.array([0.0]), np.array([1.2])
+
+    # Example 10: A situation that don't actually need to be solved.
+    # start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([0.0]), np.array([0.0]), np.array([0.0])
 
     # Compute candidate trajectories and select the optimal one using the previously defined function.
     traj_info = one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax)
