@@ -31,5 +31,6 @@ It operates several orders of magnitude faster than the [kinodynamic RRT](https:
   This corresponds to Section IV.D of the paper. It computes the minimum acceleration required for a segment given the boundary conditions, along with the velocity and time constraints. **A solution is always guaranteed** based on the provided time inferred from both [1-DOF Minimum Time](https://github.com/cc299792458/dimt-rrt/blob/main/one_dof_minimum_time.py) and [Infeasible Time Interval](https://github.com/cc299792458/dimt-rrt/blob/main/infeasible_time_interval.py). Read the paper for more detials.
   
 ---
+This implementation carefully handles several corner cases to ensure robust performance.
 
 🌟If you find this useful, please star it—thank you! If you find any problems or suggestions, feel free to open an issue.
