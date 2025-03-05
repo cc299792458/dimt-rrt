@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from tqdm import tqdm
 
@@ -69,14 +70,11 @@ def compute_traj_infos(start_state, end_state, traj_time, vmax, amax, n_dim):
 if __name__ == '__main__':
     np.random.seed(42)  # For reproducibility
 
-    # Default collision checker: returns True for all states
-    def default_collision_checker(state):
-        # state is in the form (position, velocity)
-        return True
     n_dim = 7
-    bounds = np.tile(np.array([[-10, 10]]).T, (1, n_dim))
+    num_iteration = 10000
 
-    for i in tqdm(range(10000)):
+    start_time = time.time()
+    for i in tqdm(range(num_iteration)):
         # Generate random boundary conditions.
         start_pos = np.random.uniform(-10, 10, n_dim)
         end_pos = np.random.uniform(-10, 10, n_dim)
@@ -86,6 +84,6 @@ if __name__ == '__main__':
         amax = np.random.uniform(2, 4, n_dim)
 
         start_state, end_state = np.array([start_pos, start_vel]), np.array([end_pos, end_vel])
-
-        traj_infos = compute_traj_segment(start_state=start_state, end_state=end_state, vmax=vmax, amax=amax, 
-                                        collision_checker=default_collision_checker, bounds=bounds, n_dim=n_dim)
+        traj_time, traj_infos = compute_traj_segment(start_state=start_state, end_state=end_state, vmax=vmax, amax=amax, n_dim=n_dim)
+    end_time = time.time()
+    print(f"TImes for {num_iteration} iterations: {(end_time - start_time):.3f}s.")
