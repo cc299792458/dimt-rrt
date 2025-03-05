@@ -14,3 +14,6 @@ It operates several orders of magnitude faster than the [kinodynamic RRT](https:
 ---
 
 ## 🛠 Usage
+**[DIMT-RRT](https://github.com/cc299792458/dimt-rrt/blob/main/dimt_rrt.py)** corresponds to Section V of the paper. It differs from conventional kinodynamic RRT by employing a **steering** method that connects two states by solving the **Double-Integrator Minimum Time (DIMT)** problem. This approach enables a "connect" strategy rather than an "extend" strategy, which is one of the key factors behind its enhanced speed.
+
+### Some Core Components
