@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse, Rectangle
@@ -13,13 +14,15 @@ def default_collision_checker(state):
 
 class DIMTRRT:
     def __init__(self, init_state, goal_state, bounds, vmax, amax, 
-                 collision_checker=default_collision_checker, delta_t=0.01, obstacles=None, visualization=False):
+                 collision_checker=default_collision_checker, delta_t=0.01, 
+                 obstacles=None, visualization=False, save_frames=False, save_path='dimt_rrt_frames'):
         self.init_state = init_state
         self.goal_state = goal_state
         self.V1 = [init_state]
         self.V2 = [goal_state]
         self.E1 = {}
         self.E2 = {}
+        self.path = None
         self.direction = True
         self.bounds = bounds
         self.vmax = vmax
@@ -29,7 +32,8 @@ class DIMTRRT:
         self.obstacles = obstacles
         self.dimension = vmax.shape[0]
         self.visualization = visualization
-        self.path = None
+        self.save_frames = save_frames
+        self.save_path = save_path
 
     def solve(self, max_iteration=100):
         for iteration in range(max_iteration):
@@ -177,18 +181,16 @@ class DIMTRRT:
             # Plot virtual sampled state to show legend
             self.sampled_state_point, self.sampled_state_arrow = self.plot_state(state=np.zeros([2, 2]), color='y', markersize=6, label='Sampled State')
 
-            # PLot virtual forward and backward state to show legend
-            self.forward_state_point, self.forward_state_arrow = self.plot_state(state=np.zeros([2, 2]), color='r', markersize=1, label='Forward Tree')
-            self.backward_state_point, self.backward_state_arrow = self.plot_state(state=np.zeros([2, 2]), color='g', markersize=1, label='Backward Tree')
-
-            # Plot virtual steer trajectory to show legend
+            # Plot virtual forward and backward tree to show legend
             traj_time = np.array([2])
             traj_infos = compute_traj_infos(start_state=np.zeros([2, 2]), end_state=np.ones([2, 2]), traj_time=traj_time, vmax=self.vmax, amax=self.amax, n_dim=self.dimension)
+            self.forward_tree_line = self.plot_trajectory(traj_time=traj_time, traj_infos=traj_infos, color='r', label='Forward Tree')
+            self.backward_tree_line = self.plot_trajectory(traj_time=traj_time, traj_infos=traj_infos, color='g', label='Backward Tree')
+
+            # Plot virtual steer trajectory to show legend
             self.steer_trajectory_line = self.plot_trajectory(traj_time=traj_time, traj_infos=traj_infos, color='y', label='Steer Trajectroy')
 
             # Plot virtual path to show legend
-            traj_time = np.array([2])
-            traj_infos = compute_traj_infos(start_state=np.zeros([2, 2]), end_state=np.ones([2, 2]), traj_time=traj_time, vmax=self.vmax, amax=self.amax, n_dim=self.dimension)
             self.path_line = self.plot_trajectory(traj_time=traj_time, traj_infos=traj_infos, color='b', label='Path')
 
             # Legend
@@ -199,9 +201,9 @@ class DIMTRRT:
             self.sampled_state_point = None
 
             # Remove virtual forward and backward state
-            self.forward_state_point[0].remove()
-            self.backward_state_point[0].remove()
-            del self.forward_state_point, self.backward_state_point
+            self.forward_tree_line[0].remove()
+            self.backward_tree_line[0].remove()
+            del self.forward_tree_line, self.backward_tree_line
         
             # Remove virtual steer trajectory
             self.steer_trajectory_line[0].remove()
@@ -246,6 +248,15 @@ class DIMTRRT:
 
         self._iteration_text.set_text(f"Iteration: {self.iteration}")
 
+        # Save the frame if requested
+        if self.save_frames:
+            if not os.path.exists(self.save_path):
+                os.makedirs(self.save_path)
+            if not hasattr(self, 'frame_index'):
+                self.frame_index = 0
+            self._fig.savefig(f"{self.save_path}/frame_{self.frame_index:03d}.png")
+            self.frame_index += 1
+
         # Draw the plot
         self._fig.canvas.draw()
         plt.pause(0.01)
@@ -265,6 +276,6 @@ class DIMTRRT:
     
     def plot_trajectory(self, traj_time, traj_infos, color='b', markersize=1, label=None):
         traj_pos = np.array([get_motion_states_at_local_t(traj_infos, t, self.dimension)[0] for t in np.linspace(0, traj_time, int((traj_time / 0.01)))])
-        trajectory_line = self._ax.plot(traj_pos[:, 0], traj_pos[:, 1], f'{color}o', markersize=markersize, label=label)
+        trajectory_line = self._ax.plot(traj_pos[:, 0], traj_pos[:, 1], f'-{color}o', markersize=markersize, label=label)
 
         return trajectory_line

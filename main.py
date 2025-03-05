@@ -1,7 +1,6 @@
+import time
 import random
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Ellipse, Rectangle
 
 from dimt_rrt import DIMTRRT
 
@@ -103,5 +102,6 @@ if __name__ == "__main__":
 
     dimt_rrt = DIMTRRT(np.vstack([scene.start, np.zeros([2])]), np.vstack([scene.goal, np.zeros([2])]), 
                        np.vstack((scene.bounds[::2], scene.bounds[1::2])), vmax=vmax, amax=amax, 
-                       collision_checker=scene.collision_checker, obstacles=scene.obstacles, visualization=True)
+                       collision_checker=scene.collision_checker, obstacles=scene.obstacles, visualization=True, save_frames=False)
     dimt_rrt.solve()
+    time.sleep(3.0)
