@@ -41,7 +41,7 @@ def infeasible_time_interval(start_pos, end_pos, start_vel, end_vel, vmax, amax)
 
     ##### Then calculate the infeasible time interval. #####
     delta_pacc = 0.5 * (v1 + v2) * abs(v2 - v1) / amax
-    sigma = np.sign(p2 - p1 - delta_pacc) if np.sign(p2 - p1 - delta_pacc) != 0 else 1
+    sigma = np.sign(p2 - p1 - delta_pacc) if np.sign(p2 - p1 - delta_pacc) != 0 else np.sign(v1)
     a1, a2, vlimit= -sigma * amax, sigma * amax, -sigma * vmax
     
     t1, t2 = solve_quadratic(a=a1, b=2*v1, c=(v2**2 - v1**2) / (2*a2) - (p2 - p1))
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     vmax, amax = np.array([np.random.uniform(1, 2)]), np.array([np.random.uniform(1, 2)])
 
     # # Examples
-    # vmax, amax = np.array([1]), np.array([1])
+    vmax, amax = np.array([1]), np.array([1])
     # # Examples set 1
     # start_pos, start_vel = np.array([0]), np.array([0.5])
     # # Example 1.1: region I.
@@ -114,11 +114,17 @@ if __name__ == '__main__':
     # # Example set 4
     # start_pos, start_vel = np.array([0]), np.array([0.5])
     # # Example 4.1
-    # end_pos, end_vel = np.array([0]), np.array([0.5])
+    # end_pos, end_vel = np.array([0]), np.array([0.5])   # This is kind of wired.
     # # Example 4.2
     # end_pos, end_vel = np.array([0.125]), np.array([0])
     # # Example 4.3
     # end_pos, end_vel = np.array([0.25]), np.array([0.5])
+    # # Example 4.4
+    # end_pos, end_vel = np.array([0.15625]), np.array([0.75])
+    # # Example 4.5
+    # end_pos, end_vel = np.array([0.09375]), np.array([0.25]) 
+    # # Example 4.6
+    # end_pos, end_vel = np.array([0.5]), np.array([1.0]) 
 
     # Calculate the infeasible time interval
     interval_info = infeasible_time_interval(start_pos, end_pos, start_vel, end_vel, vmax, amax)
