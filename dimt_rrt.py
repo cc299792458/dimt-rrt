@@ -29,6 +29,7 @@ class DIMTRRT:
         self.obstacles = obstacles
         self.dimension = vmax.shape[0]
         self.visualization = visualization
+        self.path = None
 
     def solve(self, max_iteration=100):
         for iteration in range(max_iteration):
@@ -38,11 +39,13 @@ class DIMTRRT:
             rand_state = self.sample_reachable_state()
             if self.connect(self.V1, self.E1, rand_state, self.direction):
                 if self.connect(self.V2, self.E2, rand_state, not self.direction):
-                    return self.extract_trajectory()
+                    self.extract_trajectory(rand_state)
+                    break
             self.swap()
             self.direction = not self.direction
         if self.visualization:
             self.plot()
+        return self.path
 
     def sample_reachable_state(self):
         while True:
@@ -73,7 +76,8 @@ class DIMTRRT:
             int_states = self.intermediate_states(traj_time, traj_infos, direction)
             V.extend(int_states)
             for int_state in int_states:
-                E[(int_state.shape, int_state.tobytes())] = nearest_state
+                key = (int_state.shape, int_state.tobytes())
+                E[key] = (nearest_state)
             if self.visualization:
                 self.nearest_state = nearest_state
                 self.rand_state = rand_state
@@ -116,8 +120,27 @@ class DIMTRRT:
         self.V1, self.V2 = self.V2, self.V1
         self.E1, self.E2 = self.E2, self.E1
 
-    def extract_trajectory(self):
-        pass
+    def extract_trajectory(self, connection_state):
+        # Backtrace from conn to root using the provided edges.
+        def backtrace(edges, root, conn):
+            path = []
+            while True:
+                path.append(conn)
+                if np.array_equal(conn, root):
+                    break
+                conn = edges[(conn.shape, conn.tobytes())]
+            return path
+
+        # Select edge dictionaries based on current direction.
+        forward_edges, backward_edges = (self.E1, self.E2) if self.direction else (self.E2, self.E1)
+        
+        # Get and reverse the path from init to connection.
+        path_from_init = backtrace(forward_edges, self.init_state, connection_state)[::-1]
+        # Get the path from connection to goal.
+        path_to_goal = backtrace(backward_edges, self.goal_state, connection_state)
+        
+        # Concatenate paths (omit duplicate connection state).
+        self.path = path_from_init + path_to_goal[1:]
 
     def plot(self, plot_sampled_state=False, plot_steer_trajectory=False, extend_tree=False):
         assert self.dimension == 2
@@ -154,24 +177,39 @@ class DIMTRRT:
             # Plot virtual sampled state to show legend
             self.sampled_state_point, self.sampled_state_arrow = self.plot_state(state=np.zeros([2, 2]), color='y', markersize=6, label='Sampled State')
 
+            # PLot virtual forward and backward state to show legend
+            self.forward_state_point, self.forward_state_arrow = self.plot_state(state=np.zeros([2, 2]), color='r', markersize=1, label='Forward Tree')
+            self.backward_state_point, self.backward_state_arrow = self.plot_state(state=np.zeros([2, 2]), color='g', markersize=1, label='Backward Tree')
+
             # Plot virtual steer trajectory to show legend
             traj_time = np.array([2])
             traj_infos = compute_traj_infos(start_state=np.zeros([2, 2]), end_state=np.ones([2, 2]), traj_time=traj_time, vmax=self.vmax, amax=self.amax, n_dim=self.dimension)
             self.steer_trajectory_line = self.plot_trajectory(traj_time=traj_time, traj_infos=traj_infos, color='y', label='Steer Trajectroy')
 
+            # Plot virtual path to show legend
+            traj_time = np.array([2])
+            traj_infos = compute_traj_infos(start_state=np.zeros([2, 2]), end_state=np.ones([2, 2]), traj_time=traj_time, vmax=self.vmax, amax=self.amax, n_dim=self.dimension)
+            self.path_line = self.plot_trajectory(traj_time=traj_time, traj_infos=traj_infos, color='b', label='Path')
+
             # Legend
-            self._ax.legend(loc="upper left")
-        
+            self._ax.legend(loc="lower left")
+
             # Remove virtual sampled state
             self.sampled_state_point[0].remove()
             self.sampled_state_point = None
-            if self.sampled_state_arrow is not None:
-                self.sampled_state_arrow.remove()
-                self.sampled_state_arrow = None
 
+            # Remove virtual forward and backward state
+            self.forward_state_point[0].remove()
+            self.backward_state_point[0].remove()
+            del self.forward_state_point, self.backward_state_point
+        
             # Remove virtual steer trajectory
             self.steer_trajectory_line[0].remove()
             self.steer_trajectory_line = None
+
+            # Remove virtual path
+            self.path_line[0].remove()
+            del self.path_line
 
             self._iteration_text = self._ax.text(0.95, 0.95, "", transform=self._ax.transAxes, 
                                                 fontsize=12, color="blue", ha="right", va="top")
@@ -199,6 +237,12 @@ class DIMTRRT:
             for state in self.int_states:
                 self.plot_state(state=state, color=color)
             self.plot_trajectory(traj_time=self.steer_traj_time, traj_infos=self.steer_traj_infos, color=color)
+        
+        if self.path is not None:
+            for start_state, end_state in zip(self.path, self.path[1:]):
+                traj_time = compute_traj_time(start_state, end_state, self.vmax, self.amax, self.dimension)
+                traj_infos = compute_traj_infos(start_state, end_state, traj_time, self.vmax, self.amax, self.dimension)
+                self.plot_trajectory(traj_time, traj_infos)
 
         self._iteration_text.set_text(f"Iteration: {self.iteration}")
 
@@ -220,7 +264,7 @@ class DIMTRRT:
         return state_point, state_arrow
     
     def plot_trajectory(self, traj_time, traj_infos, color='b', markersize=1, label=None):
-        traj_pos = np.array([get_motion_states_at_local_t(traj_infos, t, self.dimension)[0] for t in np.linspace(0, traj_time, 100)])
+        traj_pos = np.array([get_motion_states_at_local_t(traj_infos, t, self.dimension)[0] for t in np.linspace(0, traj_time, int((traj_time / 0.01)))])
         trajectory_line = self._ax.plot(traj_pos[:, 0], traj_pos[:, 1], f'{color}o', markersize=markersize, label=label)
 
         return trajectory_line
