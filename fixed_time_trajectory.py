@@ -17,12 +17,14 @@ def fixed_time_trajectory(start_pos, end_pos, start_vel, end_vel, vmax, T, a_thr
             return None
     else:
         a1, _ = solve_quadratic(a=T**2, b=(2 * T * (v1 + v2) - 4 * (p2 - p1)), c=-(v2 - v1)**2)
-        sigma = np.sign(a1) if a1 != 0 else 1
+        assert not np.isclose(a1, 0, 1e-12)
+        sigma = np.sign(a1)
         ta1_candidate = 0.5 * ((v2 - v1) / a1 + T)
         if abs(v1 + ta1_candidate * a1) <= vmax:
             traj_type = "P+P-" if sigma > 0 else "P-P+"
             vlimit = sigma * vmax
-            if abs(a1) * 0.999 > a_threshold: return None
+            if abs(a1) * 0.999 > a_threshold: 
+                return None
             a1 = sigma * np.clip(abs(a1), 0, a_threshold)
             a2 = -a1
             ta1 = ta1_candidate
@@ -36,13 +38,15 @@ def fixed_time_trajectory(start_pos, end_pos, start_vel, end_vel, vmax, T, a_thr
             traj_type = "P+L+P-" if sigma > 0 else "P-L-P+"
             vlimit = sigma * vmax
             a1 = ((vlimit - v1)**2 + (vlimit - v2)**2) / (2 * (vlimit * T - (p2 - p1)))
-            if abs(a1) * 0.999 > a_threshold: return None
+            if abs(a1) * 0.999 > a_threshold: 
+                return None
             a1 = sigma * np.clip(abs(a1), 0, a_threshold)
             a2 = -a1
             ta1 = (vlimit - v1) / a1
             ta2 = (v2 - vlimit) / a2
             tv = T - ta1 - ta2
-            if ta1 < 0 or ta2 < 0 or tv < 0: return None
+            if ta1 < 0 or ta2 < 0 or tv < 0: 
+                return None
             p_acc_end = p1 + v1 * ta1 + 0.5 * a1 * ta1**2
             p_const_end = p_acc_end + vlimit * tv
             vswitch = None

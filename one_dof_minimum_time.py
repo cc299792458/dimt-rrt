@@ -149,7 +149,7 @@ if __name__ == '__main__':
     # More examples
     # Example 5: This example illustrates that for the P-L+P+ trajectory, just before accelerating with amax, 
     # the velocity must have reached -vmax
-    # start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([0.5]), np.array([0.0]), np.array([1.0]) 
+    start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([0.5]), np.array([0.0]), np.array([1.0]) 
 
     # Example 6, 7, 8, 9:
     # Examples 6 and 9 demonstrate a scenario where, if the distance is insufficient for acceleration, 
