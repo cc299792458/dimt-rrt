@@ -43,7 +43,12 @@ def one_dof_minimum_time(start_pos, end_pos, start_vel, end_vel, vmax, amax):
 
     # Determine motion direction.
     delta_pacc = 0.5 * (v1 + v2) * abs(v2 - v1) / amax
-    sigma = np.sign(p2 - p1 - delta_pacc) if np.sign(p2 - p1 - delta_pacc) != 0 else np.sign(v1)
+    if np.sign(p2 - p1 - delta_pacc) != 0:
+        sigma = np.sign(p2 - p1 - delta_pacc)
+    elif np.sign(v1) != 0:
+        sigma = np.sign(v1)
+    else:
+        sigma = np.sign(v2)
     a1, a2, vlimit = sigma * amax, -sigma * amax, sigma * vmax 
 
     # Candidate time for acceleration phase.
@@ -144,7 +149,7 @@ if __name__ == '__main__':
     # More examples
     # Example 5: This example illustrates that for the P-L+P+ trajectory, just before accelerating with amax, 
     # the velocity must have reached -vmax
-    start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([0.5]), np.array([0.0]), np.array([1.0]) 
+    # start_pos, end_pos, start_vel, end_vel = np.array([0.0]), np.array([0.5]), np.array([0.0]), np.array([1.0]) 
 
     # Example 6, 7, 8, 9:
     # Examples 6 and 9 demonstrate a scenario where, if the distance is insufficient for acceleration, 
