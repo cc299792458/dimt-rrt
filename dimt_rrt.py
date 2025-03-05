@@ -35,7 +35,7 @@ class DIMTRRT:
         self.save_frames = save_frames
         self.save_path = save_path
 
-    def solve(self, max_iteration=100):
+    def plan(self, max_iteration=100):
         for iteration in range(max_iteration):
             if self.visualization:
                 self.iteration = iteration
